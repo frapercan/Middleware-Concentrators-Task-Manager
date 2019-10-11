@@ -1,0 +1,10 @@
+﻿{
+    "connectionString": "mongodb://localhost/node-mongo-registration-login-api",
+    "secret": "THIS IS USED TO SIGN AND VERIFY JWT TOKENS, REPLACE IT WITH YOUR OWN SECRET, IT CAN BE ANY STRING",
+    "mysql":{
+        "host": "localhost",
+        "user": "root",
+        "password":"",
+        "database":"0_MASTER_GAP_v2"
+    }
+}

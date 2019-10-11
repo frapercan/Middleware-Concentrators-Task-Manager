@@ -1,0 +1,145 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "API Documentation",
+    "version": "1.0.0",
+    "description": "API documentation description"
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "paths": {
+    "/users/authenticate": {
+      "post": {
+        "description": "Retreive user info  bearer token",
+        "tags": [
+          "auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "example": {
+                  "username": "xaxi",
+                  "password": "password"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "description": "Retrieve the full list of users",
+        "tags": [
+          "users"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Array",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        }
+      }
+    },
+    "/studies": {
+      "get": {
+        "description": "Retrieve the full list of studies",
+        "tags": [
+          "studies"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array",
+            "schema": {
+              "$ref": "#/definitions/Study"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "User": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "integer"
+        },
+        "createdDate": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "Study": {
+      "type": "object",
+      "required": [
+        "id_paquete",
+        "nombre_estudio",
+        "fecha_insercion",
+        "total_cerco",
+        "finalizado_cerco",
+        "progreso_cerco",
+        "pendiente_cerco"
+      ],
+      "properties": {
+        "id_paquete": {
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        },
+        "currentPrice": {
+          "type": "number"
+        },
+        "lastUpdate": {
+          "type": "number"
+        }
+      }
+    }
+  },
+  "tags": []
+}
