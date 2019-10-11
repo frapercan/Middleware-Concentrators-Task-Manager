@@ -1,5 +1,9 @@
-# node-mongo-registration-login-api
+# Middleware NodeJS
 
-NodeJS + MongoDB API for User Management, Authentication and Registration
+NodeJS + MongoDB API para la gestión de usuarios y permisos y comunicación del CORE con el FRONT.
 
-For documentation and instructions check out http://jasonwatmore.com/post/2018/06/14/nodejs-mongodb-simple-api-for-authentication-registration-and-user-management
+# Despliegue:
+
+npm install
+
+npm start || nodemon start para detectar cambios y compilar automaticamente.
