@@ -94,11 +94,11 @@ id_paquete = ? \
     AND id_estado_tareas_paquete_cerco_finalizado != 1);",
     [id, id, id, id]
   );
-  return result.filter(result => result.cantidad); // Get rid of empty communication problems
+  return result; // Get rid of empty communication problems
 }
 
 
-async function getIncidentResult(id) {
+async function getIssuesResult(id) {
   const [result, metadata] = await pool.query(
     "select nombre_incidencia,sum(case when id_resultado_incidencia in (3,4,5) then numero_equipos else 0 end) as detectados,sum(case when id_resultado_incidencia = 5 then numero_equipos else 0 end) as  arreglados,sum(case when id_resultado_incidencia in(5,6) then 1 else 0 end) as fixflag from  \
     ((SELECT  \
@@ -127,9 +127,18 @@ async function getIncidentResult(id) {
   return result;
 }
 
+async function getIssuesList() {
+  const [result, metadata] = await pool.query(
+    "SELECT * FROM 0_MASTER_GAP_v2.5_0_incidencia;"
+  );
+  return result;
+
+}
+
 module.exports = {
   get,
   getAll,
   getCommunicationResult,
-  getIncidentResult
+  getIssuesResult,
+  getIssuesList
 };

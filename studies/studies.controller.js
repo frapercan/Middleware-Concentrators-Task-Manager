@@ -2,8 +2,10 @@
 const router = express.Router();
 const studyService = require("./study.service");
 
-// routes
 
+
+router.get("/issues", getIssuesList);
+router.get("/:id", get);
 /**
  * @swagger
  * /studies:
@@ -21,11 +23,10 @@ const studyService = require("./study.service");
  *         schema:
  *           $ref: '#/definitions/Study'
  */
-router.get("/:id", get);
-
 router.get("/", getAll);
+router.post("/", createStudy)
 router.get("/:id/result", getCommunicationResult);
-router.get("/:id/result/incident",getIncidentResult);
+router.get("/:id/result/issues", getIssueResult);
 
 module.exports = router;
 
@@ -33,6 +34,14 @@ function get(req, res, next) {
   studyService
     .get(req.params.id)
     .then(study => res.json(study))
+    .catch(err => next(err));
+}
+
+function createStudy(req, res, next) {
+  console.log(req.body)
+  studyService
+    .createStudy(req.body)
+    .then(study => study ? res.json(study) : res.status(400).json({ message: 'not valid study' }))
     .catch(err => next(err));
 }
 
@@ -50,9 +59,16 @@ function getCommunicationResult(req, res, next) {
     .catch(err => next(err));
 }
 
-function getIncidentResult(req, res, next) {
+function getIssueResult(req, res, next) {
   studyService
-    .getIncidentResult(req.params.id)
+    .getIssuesResult(req.params.id)
+    .then(result => res.json(result))
+    .catch(err => next(err));
+}
+
+function getIssuesList(req, res, next) {
+  studyService
+    .getIssuesList(req.params.id)
     .then(result => res.json(result))
     .catch(err => next(err));
 }

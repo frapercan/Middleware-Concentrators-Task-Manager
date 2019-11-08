@@ -5,8 +5,8 @@
  *   Study:
  *     type: object
  *     required:
- *       - id_paquete
- *       - nombre_estudio
+ *       - id_estudio
+ *       - nombre
  *       - fecha_insercion
  *       - total_cerco
  *       - finalizado_cerco
@@ -23,11 +23,11 @@
  *         type: number
  */
 class Study {
-    constructor (id_paquete, nombre_estudio,fecha_insercion,id_tipo_periodicidad, total_cerco, finalizado_cerco,progreso_cerco,pendiente_cerco, progreso) {
-      this.id_paquete = id_paquete
-      this.nombre_estudio = nombre_estudio,
+    constructor (id_estudio, nombre,fecha_insercion,n_ciclos, total_cerco, finalizado_cerco,progreso_cerco,pendiente_cerco, progreso) {
+      this.id_estudio = id_estudio
+      this.nombre = nombre,
       this.fecha_insercion = fecha_insercion,
-      this.id_tipo_periodicidad = id_tipo_periodicidad,
+      this.n_ciclos = n_ciclos,
       this.total_cerco = total_cerco
       this.finalizado_cerco = finalizado_cerco,
       this.progreso_cerco = progreso_cerco,
