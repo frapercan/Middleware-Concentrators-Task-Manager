@@ -3,49 +3,83 @@ const Study = require("./studies.model");
 
 async function get(id) {
   const [result, metadata] = await pool.query(
-    "SELECT nombre_estudio,count(b.lvcid) as 'total_cerco' from 0_MASTER_GAP_v2.0_0_paquete a RIGHT JOIN 0_MASTER_GAP_v2.1_0_concentradores_paquete b ON a.id_paquete = b.id_paquete where a.id_paquete = ?",
+    "SELECT a.nombre,count(b.id_paquete_concentrador) as 'total' from  estudio a RIGHT JOIN  paquete_concentrador b ON a.id_paquete = b.id_paquete where a.id_estudio = ?",
     [id]
   );
   return result[0];
 }
 
+async function createExecutionSettings(form) {
+  pool.query();
+
+  return 200;
+}
+
+async function createIssueSettings(form) {
+  pool.query();
+
+  return 200;
+}
+
+async function createStudy(form) {
+  pool.query();
+  return 200;
+}
+
+async function createCERCOPackage(form) {
+  pool.query();
+  return 200;
+}
+
+async function createStudy(form) {
+  pool.query();
+  return 200;
+}
 async function getAll() {
   const [result, metadata] = await pool.query(
-    "SELECT  \
-    paq.id_paquete, \
-    nombre_estudio, \
-    fecha_insercion, \
-    id_tipo_periodicidad, \
-    COUNT(con.lvcid) AS total_cerco, \
-    COUNT(CASE \
-        WHEN con.id_estado_tareas_paquete_cerco = 3 THEN 1 \
-    END) AS finalizado_cerco, \
-    COUNT(CASE \
-        WHEN con.id_estado_tareas_paquete_cerco = 2 THEN 1 \
-    END) AS progreso_cerco, \
-    COUNT(CASE \
-        WHEN con.id_estado_tareas_paquete_cerco = 1 THEN 1 \
-    END) AS pendiente_cerco \
-FROM \
-    0_MASTER_GAP_v2.0_0_paquete paq \
-        RIGHT JOIN \
-    0_MASTER_GAP_v2.1_0_concentradores_paquete con ON con.id_paquete = paq.id_paquete \
-where paq.id_paquete IS NOT NULL \
-group by \
-    con.id_paquete;"
+    "select \
+    a.id_estudio, \
+    a.nombre, \
+    a.fecha_insercion, \
+    conf.n_ciclos, \
+    COUNT( \
+      distinct(cont.id_concentrador)\
+    ) as total, \
+    COUNT( \
+      cont.id_concentrador \
+    ) as total_tareas, \
+    COUNT( \
+      CASE WHEN cont.id_estado_ejecucion = 3 THEN 1 END \
+    ) AS finalizado_tarea, \
+    COUNT( \
+      CASE WHEN cont.id_estado_ejecucion = 2 THEN 1 END \
+    ) AS progreso_tarea,  \
+    COUNT( \
+      CASE WHEN cont.id_estado_ejecucion = 1 THEN 1 END \
+    ) AS encolado_tarea, \
+    COUNT( \
+      CASE WHEN cont.id_estado_ejecucion = 0 THEN 1 END \
+    ) AS pendiente_tarea \
+  FROM \
+    estudio a \
+    inner JOIN controlador cont ON a.id_estudio = cont.id_estudio \
+    inner JOIN configuracion_ejecucion conf ON conf.id_configuracion_ejecucion = a.id_configuracion_ejecucion \
+  group by \
+    a.id_estudio;"
   );
 
   return result.map(study => {
     return new Study(
-      study.id_paquete,
-      study.nombre_estudio,
+      study.id_estudio,
+      study.nombre,
       study.fecha_insercion,
-      study.id_tipo_periodicidad,
-      study.total_cerco,
-      study.finalizado_cerco,
-      study.progreso_cerco,
-      study.pendiente_cerco,
-      study.finalizado_cerco / study.total_cerco
+      study.n_ciclos,
+      study.total,
+      study.total_tareas,
+      study.finalizado_tarea,
+      study.progreso_tarea,
+      study.encolado_tarea,
+      study.pendiente_tarea
     );
   });
 }
@@ -53,50 +87,37 @@ group by \
 // posible refactorizacion.
 async function getCommunicationResult(id) {
   const [result, metadata] = await pool.query(
-    "SELECT  \
-'Total' as 'nombre', COUNT(*) as cantidad \
-FROM \
-0_MASTER_GAP_v2.1_0_concentradores_paquete \
-WHERE \
-id_paquete = ?  \
-UNION SELECT  \
-a.nombre_estado_tarea_paquete_cerco_finalizado, b.count \
-FROM \
-0_MASTER_GAP_v2.1_1_0_estado_tareas_paquete_cerco_finalizado a \
-    LEFT JOIN \
-(SELECT  \
-    id_estado_tareas_paquete_cerco_finalizado, \
-        COUNT(id_estado_tareas_paquete_cerco) AS count \
-FROM \
-    0_MASTER_GAP_v2.1_0_concentradores_paquete \
-WHERE \
-    id_paquete = ? \
-        AND id_estado_tareas_paquete_cerco = 3 \
-GROUP BY id_estado_tareas_paquete_cerco_finalizado) b ON a.id_estado_tarea_paquete_cerco_finalizado = b.id_estado_tareas_paquete_cerco_finalizado  \
-UNION (SELECT  \
-'Pendientes' AS Pending, SUM(a.count) \
-FROM \
-(SELECT  \
-    id_estado_tareas_paquete_cerco, \
-        COUNT(id_estado_tareas_paquete_cerco) AS count \
-FROM \
-    0_MASTER_GAP_v2.1_0_concentradores_paquete \
-WHERE \
-    id_paquete = ? \
-        AND id_estado_tareas_paquete_cerco != 3 \
-GROUP BY id_estado_tareas_paquete_cerco) a) UNION (SELECT  \
-'Inaccesibles', COUNT(*) \
-FROM \
-0_MASTER_GAP_v2.1_0_concentradores_paquete \
-WHERE \
-id_paquete = ? \
-    AND id_estado_tareas_paquete_cerco = 3 \
-    AND id_estado_tareas_paquete_cerco_finalizado != 1);",
-    [id, id, id, id]
+    "SELECT \
+    'total' as 'name',ciclo, COUNT(*) AS 'amount'\
+      FROM\
+          resultado_comunicacion_cerco WHERE\
+          id_estudio = ?\
+          group by ciclo\
+    UNION\
+    SELECT \
+      COM.nombre,\
+      RESCOM.ciclo,\
+      COUNT(RESCOM.id_resultado_comunicacion) AS 'amount'\
+    FROM\
+      resultado_comunicacion_cerco RESCOM\
+          LEFT JOIN\
+      resultado_comunicacion COM ON COM.id_resultado_comunicacion = RESCOM.id_resultado_comunicacion\
+    WHERE\
+      RESCOM.id_estudio = ?\
+    GROUP BY RESCOM.ciclo , RESCOM.id_resultado_comunicacion \
+    UNION SELECT \
+      'Inaccesibles', ciclo, COUNT(*) AS amount\
+    FROM\
+      resultado_comunicacion_cerco\
+    WHERE\
+      id_estudio = ?\
+          AND id_resultado_comunicacion != 1\
+    GROUP BY ciclo;",
+    [id, id, id]
   );
+
   return result; // Get rid of empty communication problems
 }
-
 
 async function getIssuesResult(id) {
   const [result, metadata] = await pool.query(
@@ -122,7 +143,7 @@ async function getIssuesResult(id) {
         0_MASTER_GAP_v2.5_0_incidencia b ON perf.id_incidencia = b.id_incidencia \
     WHERE \
         perf.id_paquete = ?) b group by b.nombre_incidencia ;",
-    [id,id]
+    [id, id]
   );
   return result;
 }
@@ -132,11 +153,11 @@ async function getIssuesList() {
     "SELECT * FROM 0_MASTER_GAP_v2.5_0_incidencia;"
   );
   return result;
-
 }
 
 module.exports = {
   get,
+  createStudy,
   getAll,
   getCommunicationResult,
   getIssuesResult,

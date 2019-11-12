@@ -120,7 +120,7 @@
         "id_paquete",
         "nombre_estudio",
         "fecha_insercion",
-        "total_cerco",
+        "total",
         "finalizado_cerco",
         "progreso_cerco",
         "pendiente_cerco"

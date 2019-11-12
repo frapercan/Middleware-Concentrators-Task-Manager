@@ -2,8 +2,6 @@
 const router = express.Router();
 const studyService = require("./study.service");
 
-
-
 router.get("/issues", getIssuesList);
 router.get("/:id", get);
 /**
@@ -24,7 +22,7 @@ router.get("/:id", get);
  *           $ref: '#/definitions/Study'
  */
 router.get("/", getAll);
-router.post("/", createStudy)
+router.post("/", createStudy);
 router.get("/:id/result", getCommunicationResult);
 router.get("/:id/result/issues", getIssueResult);
 
@@ -38,10 +36,14 @@ function get(req, res, next) {
 }
 
 function createStudy(req, res, next) {
-  console.log(req.body)
+  console.log(req.body);
   studyService
     .createStudy(req.body)
-    .then(study => study ? res.json(study) : res.status(400).json({ message: 'not valid study' }))
+    .then(study =>
+      study
+        ? res.json(study)
+        : res.status(400).json({ message: "not valid study" })
+    )
     .catch(err => next(err));
 }
 

@@ -8,7 +8,7 @@
  *       - id_estudio
  *       - nombre
  *       - fecha_insercion
- *       - total_cerco
+ *       - total
  *       - finalizado_cerco
  *       - progreso_cerco
  *       - pendiente_cerco
@@ -23,16 +23,18 @@
  *         type: number
  */
 class Study {
-    constructor (id_estudio, nombre,fecha_insercion,n_ciclos, total_cerco, finalizado_cerco,progreso_cerco,pendiente_cerco, progreso) {
+    constructor (id_estudio, nombre,fecha_insercion,n_ciclos, total, total_tareas , finalizado_tarea,progreso_tarea,pendiente_tarea,encolado_tarea) {
       this.id_estudio = id_estudio
       this.nombre = nombre,
       this.fecha_insercion = fecha_insercion,
       this.n_ciclos = n_ciclos,
-      this.total_cerco = total_cerco
-      this.finalizado_cerco = finalizado_cerco,
-      this.progreso_cerco = progreso_cerco,
-      this.pendiente_cerco = pendiente_cerco,
-      this.progreso = progreso
+      this.total = total
+      this.total_tareas = total_tareas
+      this.finalizado_cerco = finalizado_tarea,
+      this.progreso_cerco = progreso_tarea,
+      this.pendiente_cerco = pendiente_tarea,
+      this.encolado_tarea = encolado_tarea,
+      this.progreso = finalizado_tarea / total_tareas
     }}
 
 
