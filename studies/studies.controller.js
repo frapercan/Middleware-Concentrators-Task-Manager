@@ -25,6 +25,8 @@ router.get("/", getAll);
 router.post("/", createStudy);
 router.get("/:id/result", getCommunicationResult);
 router.get("/:id/result/issues", getIssueResult);
+router.get("/:id/result/ciclos", getCiclosInfo);
+
 
 module.exports = router;
 
@@ -71,6 +73,13 @@ function getIssueResult(req, res, next) {
 function getIssuesList(req, res, next) {
   studyService
     .getIssuesList(req.params.id)
+    .then(result => res.json(result))
+    .catch(err => next(err));
+}
+
+function getCiclosInfo(req, res, next) {
+  studyService
+    .getCiclosInfo(req.params.id)
     .then(result => res.json(result))
     .catch(err => next(err));
 }

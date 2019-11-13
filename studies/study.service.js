@@ -116,36 +116,49 @@ async function getCommunicationResult(id) {
     [id, id, id]
   );
 
-  return result; // Get rid of empty communication problems
+  return groupByCiclo(result);
 }
 
 async function getIssuesResult(id) {
   const [result, metadata] = await pool.query(
-    "select nombre_incidencia,sum(case when id_resultado_incidencia in (3,4,5) then numero_equipos else 0 end) as detectados,sum(case when id_resultado_incidencia = 5 then numero_equipos else 0 end) as  arreglados,sum(case when id_resultado_incidencia in(5,6) then 1 else 0 end) as fixflag from  \
-    ((SELECT  \
-        b.nombre_incidencia, \
-        b.id_incidencia, \
-        a.id_resultado_incidencia, \
-        COUNT(a.id_resultado_incidencia) as numero_equipos \
-    FROM \
-        0_MASTER_GAP_v2.3_3_resultado_incidencia_cerco a \
-            LEFT JOIN \
-        0_MASTER_GAP_v2.5_0_incidencia b ON a.id_incidencia = b.id_incidencia \
-    WHERE \
-        id_paquete = ? \
-            AND id_resultado_incidencia IN (4 , 5, 6) \
-    GROUP BY a.id_incidencia , a.id_resultado_incidencia)   \
-    UNION SELECT  \
-        b.nombre_incidencia, NULL, NULL,null \
-    FROM \
-        0_MASTER_GAP_v2.3_1_perfil_configuracion_incidencia perf \
-            LEFT JOIN \
-        0_MASTER_GAP_v2.5_0_incidencia b ON perf.id_incidencia = b.id_incidencia \
-    WHERE \
-        perf.id_paquete = ?) b group by b.nombre_incidencia ;",
-    [id, id]
+    "SELECT \
+      E.ciclo,\
+      D.nombre,\
+      COUNT(DISTINCT (CASE\
+              WHEN\
+                  RESINC.id_resultado_incidencia IN (4, 5, 6)\
+                      AND C.id_incidencia = RESINC.id_incidencia\
+                      AND E.ciclo = RESINC.ciclo\
+              THEN\
+                  1\
+          END)) AS detectado,\
+      COUNT(DISTINCT (CASE\
+              WHEN\
+                  RESINC.id_resultado_incidencia IN (6)\
+                      AND C.id_incidencia = RESINC.id_incidencia\
+                      AND E.ciclo = RESINC.ciclo\
+              THEN\
+                  1\
+          END)) AS corregido,\
+          0 as fixflag \
+    FROM\
+      estudio A\
+          INNER JOIN\
+      estudio_configuracion_incidencia B ON A.id_configuracion_incidencia = B.id_estudio_configuracion_incidencia\
+          INNER JOIN\
+      configuracion_incidencia C ON C.id_estudio_configuracion_incidencia = B.id_estudio_configuracion_incidencia\
+          INNER JOIN\
+      incidencia D ON D.id_incidencia = C.id_incidencia\
+          INNER JOIN\
+      resultado_comunicacion_cerco E ON E.id_estudio = A.id_estudio\
+          INNER JOIN\
+      resultado_incidencia_cerco RESINC ON A.id_estudio = RESINC.id_estudio\
+  WHERE\
+      A.id_estudio = ?\
+  GROUP BY E.ciclo , D.nombre;",
+    [id]
   );
-  return result;
+  return groupByCiclo(result);
 }
 
 async function getIssuesList() {
@@ -155,11 +168,33 @@ async function getIssuesList() {
   return result;
 }
 
+async function getCiclosInfo(id) {
+  const [result, metadata] = await pool.query(
+    "SELECT ciclo,max(fecha_comunicacion) as first ,min(fecha_comunicacion) as last  FROM 0_MASTER_GAP_Pruebas.resultado_comunicacion_cerco where id_estudio = ? group by ciclo;",[id]
+  )
+  return result;
+}
+
 module.exports = {
   get,
   createStudy,
   getAll,
   getCommunicationResult,
   getIssuesResult,
-  getIssuesList
+  getIssuesList,
+  getCiclosInfo
 };
+
+function groupByCiclo(obj){
+  //uff,
+  groupedByCiclo = {};
+  obj.map(item => (groupedByCiclo[Number(item.ciclo)] = []));
+  for (let i of Object.keys(groupedByCiclo)) {
+    for (var j = 0; j < obj.length; j++) {
+      if (obj[j].ciclo == i) {
+        groupedByCiclo[i].push(obj[j]);
+      }
+    }
+  }
+  return Object.keys(groupedByCiclo).map(loop => groupedByCiclo[loop]);
+}
