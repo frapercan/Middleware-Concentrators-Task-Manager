@@ -6,16 +6,16 @@ async function getAll() {
     "SELECT \
     v_inf.id_concentrador,\
     v_inf.lvcid,\
-    (SELECT dato FROM view_informacion_concentrador where id_concentrador = v_inf.id_concentrador and nombre = 'CERCO-VER') as 'CERCO-VER',\
-    (SELECT dato FROM view_informacion_concentrador where id_concentrador = v_inf.id_concentrador and nombre = 'HW-VER') as 'HW-VER',\
-    (SELECT dato FROM view_informacion_concentrador where id_concentrador = v_inf.id_concentrador and nombre = 'ROM-VER') as 'ROM-VER',\
-    (SELECT dato FROM view_informacion_concentrador where id_concentrador = v_inf.id_concentrador and nombre = 'MODEM-VER') as 'MODEM-VER',\
-    (SELECT dato FROM view_informacion_concentrador where id_concentrador = v_inf.id_concentrador and nombre = '/var') as 'var',\
-    (SELECT dato FROM view_informacion_concentrador where id_concentrador = v_inf.id_concentrador and nombre = '/disk') as '/disk',\
-    (SELECT dato FROM view_informacion_concentrador where id_concentrador = v_inf.id_concentrador and nombre = '/tmpn2pload') as '/tmpn2pload',\
-    (SELECT dato FROM view_informacion_concentrador where id_concentrador = v_inf.id_concentrador and nombre = '/tmpdailyClosure') as '/tmpdailyClosure',\
-    (SELECT dato FROM view_informacion_concentrador where id_concentrador = v_inf.id_concentrador and nombre = 'MODEM-REBOOT-PERIODICITY') as 'MODEM-REBOOT-PERIODICITY',\
-    (SELECT dato FROM view_informacion_concentrador where id_concentrador = v_inf.id_concentrador and nombre = 'CERCO-REBOOT-PERIODICITY') as 'CERCO-REBOOT-PERIODICITY'\
+    (SELECT dato FROM view_informacion_concentrador where id_concentrador = v_inf.id_concentrador and nombre = 'CERCO-VER') as 'cercoVersion',\
+    (SELECT dato FROM view_informacion_concentrador where id_concentrador = v_inf.id_concentrador and nombre = 'HW-VER') as 'hwVersion',\
+    (SELECT dato FROM view_informacion_concentrador where id_concentrador = v_inf.id_concentrador and nombre = 'ROM-VER') as 'romVersion',\
+    (SELECT dato FROM view_informacion_concentrador where id_concentrador = v_inf.id_concentrador and nombre = 'MODEM-VER') as 'modemVersion',\
+    (SELECT dato FROM view_informacion_concentrador where id_concentrador = v_inf.id_concentrador and nombre = '/var') as 'varMem',\
+    (SELECT dato FROM view_informacion_concentrador where id_concentrador = v_inf.id_concentrador and nombre = '/disk') as 'diskMem',\
+    (SELECT dato FROM view_informacion_concentrador where id_concentrador = v_inf.id_concentrador and nombre = '/tmpn2pload') as 'tmpn2ploadMem',\
+    (SELECT dato FROM view_informacion_concentrador where id_concentrador = v_inf.id_concentrador and nombre = '/tmpdailyClosure') as 'tmpDailyClousureMem',\
+    (SELECT dato FROM view_informacion_concentrador where id_concentrador = v_inf.id_concentrador and nombre = 'MODEM-REBOOT-PERIODICITY') as 'modemRebootPeriodicity',\
+    (SELECT dato FROM view_informacion_concentrador where id_concentrador = v_inf.id_concentrador and nombre = 'CERCO-REBOOT-PERIODICITY') as 'cercoRebootPeriodicity'\
     FROM view_informacion_concentrador v_inf\
     group by v_inf.id_concentrador;"
   );
@@ -24,16 +24,16 @@ async function getAll() {
     return new Concentrator(
       concentrator.id_concentrador,
       concentrator.lvcid,
-      concentrator["CERCO-VER"],
-      concentrator["HW-VER"],
-      concentrator["ROM-VER"],
-      concentrator["MODEM-VER"],
-      concentrator["var"],
-      concentrator["/disk"],
-      concentrator["/tmpn2pload"],
-      concentrator["/tmpdailyClosure"],
-      concentrator["MODEM-REBOOT-PERIODICITY"],
-      concentrator["CERCO-REBOOT-PERIODICITY"]
+      concentrator.cercoVersion,
+      concentrator.hwVersion,
+      concentrator.romVersion,
+      concentrator.modemVersion,
+      concentrator.varMem,
+      concentrator.diskMem,
+      concentrator.tmpn2ploadMem,
+      concentrator.tmpDailyClousureMem,
+      concentrator.modemRebootPeriodicity,
+      concentrator.cercoRebootPeriodicity
 
 
 

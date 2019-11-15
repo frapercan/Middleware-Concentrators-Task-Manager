@@ -38,14 +38,9 @@ function get(req, res, next) {
 }
 
 function createStudy(req, res, next) {
-  console.log(req.body);
   studyService
-    .createStudy(req.body)
-    .then(study =>
-      study
-        ? res.json(study)
-        : res.status(400).json({ message: "not valid study" })
-    )
+    .create(req.body)
+    .then(() => res.json({}))
     .catch(err => next(err));
 }
 
