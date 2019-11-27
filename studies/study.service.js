@@ -83,7 +83,13 @@ async function create(form) {
       "insert into configuracion_incidencia (id_estudio_configuracion_incidencia,id_incidencia,deteccion,correcion,ciclo_insercion) values ?",
       [configuracion_incidencia_values]
     );
-    console.log(paquete.insertId,configuracion_ejecucion.insertId,estudio_configuracion_incidencia.insertId,name.name,description.description)
+    console.log(
+      paquete.insertId,
+      configuracion_ejecucion.insertId,
+      estudio_configuracion_incidencia.insertId,
+      name.name,
+      description.description
+    );
     const [estudio] = await connection.query(
       "insert into estudio (id_paquete,id_configuracion_ejecucion,id_configuracion_incidencia,nombre,descripcion) values (?,?,?,?,?)",
       [
@@ -94,7 +100,7 @@ async function create(form) {
         description.description
       ]
     );
-    console.log(estudio)
+    console.log(estudio);
 
     await connection.commit();
   } catch (err) {
@@ -113,6 +119,8 @@ async function getAll() {
     a.nombre, \
     a.fecha_insercion, \
     conf.n_ciclos, \
+    cont.ciclo_actual,\
+    min(cont.fecha_inicio) as fecha_inicio_ciclo, \
     COUNT( \
       distinct(cont.id_concentrador)\
     ) as total, \
@@ -145,6 +153,8 @@ async function getAll() {
       study.nombre,
       study.fecha_insercion,
       study.n_ciclos,
+      study.ciclo_actual,
+      study.fecha_inicio_ciclo,
       study.total,
       study.total_tareas,
       study.finalizado_tarea,
@@ -195,10 +205,10 @@ async function getIssuesResult(id) {
     "SELECT       \
     RESINC.ciclo,      \
     D.nombre,      \
-    COUNT(DISTINCT (CASE WHEN RESINC.id_resultado_incidencia IN (4, 5, 6) \
-    AND C.id_incidencia = RESINC.id_incidencia THEN 1 END)) AS detectado,      \
-    COUNT(DISTINCT (CASE WHEN RESINC.id_resultado_incidencia IN (6) \
-    AND C.id_incidencia = RESINC.id_incidencia THEN 1 END)) AS corregido,          \
+    COUNT (CASE WHEN RESINC.id_resultado_incidencia IN (4, 5, 6) \
+    AND C.id_incidencia = RESINC.id_incidencia THEN 1 END) AS detectado,      \
+    COUNT (CASE WHEN RESINC.id_resultado_incidencia IN (6) \
+    AND C.id_incidencia = RESINC.id_incidencia THEN 1 END) AS corregido,          \
     C.correcion as fixflag     \
     FROM estudio A \
     INNER JOIN estudio_configuracion_incidencia B \
@@ -217,9 +227,7 @@ async function getIssuesResult(id) {
 }
 
 async function getIssuesList() {
-  const [result, metadata] = await pool.query(
-    "SELECT * from incidencia;"
-  );
+  const [result, metadata] = await pool.query("SELECT * from incidencia;");
   return result;
 }
 

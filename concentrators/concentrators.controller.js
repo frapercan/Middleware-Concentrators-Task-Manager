@@ -22,6 +22,7 @@ const concentratorService = require("./concentrators.service");
  *           $ref: '#/definitions/Concentrator'
  */
 router.get("/", getAll);
+router.post("/concentrators", getConcentrators);
 
 module.exports = router;
 
@@ -30,6 +31,14 @@ module.exports = router;
 function getAll(req, res, next) {
   concentratorService
     .getAll()
+    .then(studies => res.json(studies))
+    .catch(err => next(err));
+}
+
+
+function getConcentrators(req, res, next) {
+  concentratorService
+    .getConcentrators(req.body)
     .then(studies => res.json(studies))
     .catch(err => next(err));
 }

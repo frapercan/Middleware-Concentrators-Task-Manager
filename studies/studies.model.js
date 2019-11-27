@@ -23,11 +23,13 @@
  *         type: number
  */
 class Study {
-    constructor (id_estudio, nombre,fecha_insercion,n_ciclos, total, total_tareas , finalizado_tarea,progreso_tarea,pendiente_tarea,encolado_tarea) {
+    constructor (id_estudio, nombre,fecha_insercion,n_ciclos,ciclo_actual,fecha_inicio_ciclo, total, total_tareas , finalizado_tarea,progreso_tarea,pendiente_tarea,encolado_tarea) {
       this.id_estudio = id_estudio
       this.nombre = nombre,
       this.fecha_insercion = fecha_insercion,
       this.n_ciclos = n_ciclos,
+      this.ciclo_actual = ciclo_actual,
+      this.fecha_inicio_ciclo = fecha_inicio_ciclo
       this.total = total
       this.total_tareas = total_tareas
       this.finalizado_cerco = finalizado_tarea,
