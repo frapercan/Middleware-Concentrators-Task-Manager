@@ -207,7 +207,7 @@ async function getIssuesResult(id) {
     D.nombre,      \
     COUNT (CASE WHEN RESINC.id_resultado_incidencia IN (4, 5, 6) \
     AND C.id_incidencia = RESINC.id_incidencia THEN 1 END) AS detectado,      \
-    COUNT (CASE WHEN RESINC.id_resultado_incidencia IN (6) \
+    COUNT (CASE WHEN RESINC.id_resultado_incidencia IN (5) \
     AND C.id_incidencia = RESINC.id_incidencia THEN 1 END) AS corregido,          \
     C.correcion as fixflag     \
     FROM estudio A \

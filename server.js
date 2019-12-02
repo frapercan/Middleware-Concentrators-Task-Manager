@@ -31,6 +31,7 @@ app.use(jwt());
 app.use('/users', require('./users/users.controller'));
 app.use('/studies', require('./studies/studies.controller'));
 app.use('/concentrators', require('./concentrators/concentrators.controller'));
+app.use('/packages', require('./packages/packages.controller'));
 
 // global error handler
 app.use(errorHandler);

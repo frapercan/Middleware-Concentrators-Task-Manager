@@ -23,6 +23,7 @@ const concentratorService = require("./concentrators.service");
  */
 router.get("/", getAll);
 router.post("/concentrators", getConcentrators);
+router.post("/package", getConcentratorsByPackage);
 
 module.exports = router;
 
@@ -31,7 +32,7 @@ module.exports = router;
 function getAll(req, res, next) {
   concentratorService
     .getAll()
-    .then(studies => res.json(studies))
+    .then(concentrators => res.json(concentrators))
     .catch(err => next(err));
 }
 
@@ -39,7 +40,14 @@ function getAll(req, res, next) {
 function getConcentrators(req, res, next) {
   concentratorService
     .getConcentrators(req.body)
-    .then(studies => res.json(studies))
+    .then(concentrators => res.json(concentrators))
+    .catch(err => next(err));
+}
+
+function getConcentratorsByPackage(req, res, next) {
+  concentratorService
+    .getConcentratorsByPackage(req.body)
+    .then(concentrators => res.json(concentrators))
     .catch(err => next(err));
 }
 

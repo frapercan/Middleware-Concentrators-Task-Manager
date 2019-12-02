@@ -117,10 +117,8 @@
             }
           }
         }
-      }
-    },
-    "/packages": {
-      "get": {
+      },
+      "getAll": {
         "description": "Retrieve the full list of packages",
         "tags": [
           "packages"
@@ -203,7 +201,7 @@
         }
       }
     },
-    "Package": {
+    "package": {
       "type": "object",
       "required": [
         "id_paquete",
