@@ -26,14 +26,14 @@ async function getAll() {
 
 async function getConcentrators(concentrators) {
   console.log(concentrators);
-  LVCIDS = concentrators.map(lvcid => lvcid.LVCID);
-  console.log(LVCIDS);
+  lvcidS = concentrators.map(lvcid => lvcid.lvcid);
+  console.log(lvcidS);
   const [
     result,
     metadata
   ] = await pool.query(
     "SELECT * FROM 0_MASTER_GAP_Pruebas.informacion_concentrador_front where lvcid in (?);",
-    [LVCIDS]
+    [lvcidS]
   );
 
   return result.map(concentrator => {
@@ -57,7 +57,7 @@ async function getConcentrators(concentrators) {
 async function getConcentratorsByPackage(package) {
   console.log(package)
   const [result, metadata] = await pool.query(
-    "SELECT c.lvcid as LVCID FROM paquete_concentrador pc \
+    "SELECT c.lvcid as lvcid FROM paquete_concentrador pc \
      right join concentrador c on c.id_concentrador = pc.id_concentrador  \
      where pc.id_paquete = ?;",
     package.id_paquete

@@ -11,7 +11,8 @@ async function get(id) {
 }
 
 async function create(form) {
-  const targets = form["targets"].map(cerco => cerco.LVCID);
+  console.log(form)
+  const targets = form["targets"].map(cerco => cerco.lvcid);
   const { name, description, settings, issues } = form;
 
   const connection = await pool.getConnection();
@@ -169,27 +170,27 @@ async function getAll() {
 async function getCommunicationResult(id) {
   const [result, metadata] = await pool.query(
     "SELECT \
-    'total' as 'name',ciclo, COUNT(*) AS 'amount'\
+    'total' as 'name',ciclo, COUNT(distinct(id_concentrador)) AS 'amount'\
       FROM\
-      view_resultado_comunicacion_cerco WHERE\
+      resultado_comunicacion_cerco WHERE\
           id_estudio = ?\
           group by ciclo\
     UNION\
     SELECT \
       COM.nombre,\
       RESCOM.ciclo,\
-      COUNT(RESCOM.id_resultado_comunicacion) AS 'amount'\
+      COUNT(distinct(RESCOM.id_concentrador)) AS 'amount'\
     FROM\
-    view_resultado_comunicacion_cerco RESCOM\
+    resultado_comunicacion_cerco RESCOM\
           LEFT JOIN\
       resultado_comunicacion COM ON COM.id_resultado_comunicacion = RESCOM.id_resultado_comunicacion\
     WHERE\
       RESCOM.id_estudio = ?\
     GROUP BY RESCOM.ciclo , RESCOM.id_resultado_comunicacion \
     UNION SELECT \
-      'Inaccesibles', ciclo, COUNT(*) AS amount\
+      'Inaccesibles', ciclo, COUNT(distinct(id_concentrador)) AS amount\
     FROM\
-    view_resultado_comunicacion_cerco\
+    resultado_comunicacion_cerco\
     WHERE\
       id_estudio = ?\
           AND id_resultado_comunicacion != 1\

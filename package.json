@@ -8,11 +8,9 @@
         "url": "https://github.com/cornflourblue/node-mongo-registration-login-api.git"
     },
     "scripts": {
-        "swagger":"swagger-jsdoc -d swaggerDef.js -o swagger.json",
+        "swagger": "swagger-jsdoc -d swaggerDef.js -o swagger.json",
         "start": "node ./server.js",
         "dev": "npm run swagger && nodemon server.js "
-
-        
     },
     "dependencies": {
         "bcryptjs": "^2.4.3",
@@ -32,6 +30,6 @@
         "util.promisify": "^1.0.0"
     },
     "devDependencies": {
-        "nodemon": "^1.19.2"
+        "nodemon": "^1.19.4"
     }
 }
