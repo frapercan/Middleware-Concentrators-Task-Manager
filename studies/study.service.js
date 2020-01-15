@@ -11,9 +11,10 @@ async function get(id) {
 }
 
 async function create(form) {
-  console.log(form)
-  const targets = form["targets"].map(cerco => cerco.lvcid);
-  const { name, description, settings, issues } = form;
+  const { study, targets, settings, tasks } = form;
+  const LVCIDs = targets.targets.map(cerco => cerco.lvcid);
+  
+
 
   const connection = await pool.getConnection();
   await connection.beginTransaction();
@@ -21,22 +22,30 @@ async function create(form) {
   try {
     const [targetsID, metadata] = await connection.query(
       "select id_concentrador from concentrador where lvcid in (?)",
-      [targets]
+      [LVCIDs]
     );
+    let newPackage = targets.package;
+    if (targets.selectionMode == 2) { //Creamos un paquete nuevo con sus correspondicentes concentradores y tabla relacional
+      const [paquete] = await connection.query(
+        "insert into paquete (nombre,descripcion) VALUES (?,?)",[targets.name,targets.description]
+      );
+      newPackage = paquete.insertId
+      
+      console.log(targetsID)
+      const paquete_concentrador_values = targetsID.map(item => [
+        paquete.insertId,
+        item.id_concentrador
+      ]);
+      console.log('hola',paquete_concentrador_values)
+      const [paquete_concentrador] = await connection.query(
+        "insert into paquete_concentrador(id_paquete,id_concentrador) VALUES ?",
+        [paquete_concentrador_values]
+      );
+      console.log('sale')
+    }
+    console.log(newPackage)
 
-    const [paquete] = await connection.query(
-      "insert into paquete (id_paquete) VALUES ('')  "
-    );
-    const id_paquete = paquete.insertId;
-    const paquete_concentrador_values = targetsID.map(item => [
-      id_paquete,
-      item.id_concentrador
-    ]);
-    const [paquete_concentrador] = await connection.query(
-      "insert into paquete_concentrador(id_paquete,id_concentrador) VALUES ?",
-      [paquete_concentrador_values]
-    );
-    if (settings.mode == "1") {
+    if (settings.settingsMode == "1") {
       [configuracion_ejecucion] = await connection.query(
         "insert into configuracion_ejecucion(n_ciclos,id_prioridad,n_intentos_comunicacion) values (1,?,?)",
         [settings.priority, settings.attempts]
@@ -52,24 +61,28 @@ async function create(form) {
         ]
       );
     }
+    console.log('configuraciones ok')
 
     const [estudio_configuracion_incidencia] = await connection.query(
       "insert into estudio_configuracion_incidencia (nombre) values ('')"
     );
-    configuracion_incidencia_values = issues.fix.map(item => [
+    configuracion_incidencia_values = tasks.fix.map(item => [
       estudio_configuracion_incidencia.insertId,
       item.id_incidencia,
       1,
       1,
       1
     ]);
-    for (det of issues.detect) {
+    for (det of tasks.detect) {
       let marked_as_fix = 0;
-      for (iss of configuracion_incidencia_values) {
-        if (det.id_incidencia == iss[1]) {
+      for (task of configuracion_incidencia_values) {
+        if (det.id_incidencia == task[1]) {
           marked_as_fix = 1;
+          
         }
+        
       }
+      console.log(det.id_incidencia ,task,marked_as_fix)
       if (!marked_as_fix) {
         configuracion_incidencia_values.push([
           estudio_configuracion_incidencia.insertId,
@@ -79,29 +92,26 @@ async function create(form) {
           1
         ]);
       }
+
     }
+    console.log(configuracion_incidencia_values)
+
     const [configuracion_incidencia] = await connection.query(
       "insert into configuracion_incidencia (id_estudio_configuracion_incidencia,id_incidencia,deteccion,correcion,ciclo_insercion) values ?",
       [configuracion_incidencia_values]
     );
-    console.log(
-      paquete.insertId,
-      configuracion_ejecucion.insertId,
-      estudio_configuracion_incidencia.insertId,
-      name.name,
-      description.description
-    );
+    console.log(configuracion_incidencia)
     const [estudio] = await connection.query(
       "insert into estudio (id_paquete,id_configuracion_ejecucion,id_configuracion_incidencia,nombre,descripcion) values (?,?,?,?,?)",
       [
-        paquete.insertId,
+        newPackage,
         configuracion_ejecucion.insertId,
         estudio_configuracion_incidencia.insertId,
-        name.name,
-        description.description
+        study.name,
+        study.description
       ]
     );
-    console.log(estudio);
+    console.log('FInaliza correctamente');
 
     await connection.commit();
   } catch (err) {
