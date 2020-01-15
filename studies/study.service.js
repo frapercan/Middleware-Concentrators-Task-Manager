@@ -108,7 +108,7 @@ async function create(form) {
         configuracion_ejecucion.insertId,
         estudio_configuracion_incidencia.insertId,
         study.name,
-        study.description
+        study.description 
       ]
     );
     console.log('FInaliza correctamente');
