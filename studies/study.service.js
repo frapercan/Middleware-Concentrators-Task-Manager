@@ -11,9 +11,9 @@ async function get(id) {
 }
 
 async function create(form) {
-  const { study, targets, settings, tasks } = form;
+  const { study, targets, settings, issues, performances } = form;
   const LVCIDs = targets.targets.map(cerco => cerco.lvcid);
-  
+
 
 
   const connection = await pool.getConnection();
@@ -27,24 +27,19 @@ async function create(form) {
     let newPackage = targets.package;
     if (targets.selectionMode == 2) { //Creamos un paquete nuevo con sus correspondicentes concentradores y tabla relacional
       const [paquete] = await connection.query(
-        "insert into paquete (nombre,descripcion) VALUES (?,?)",[targets.name,targets.description]
+        "insert into paquete (nombre,descripcion) VALUES (?,?)", [targets.name, targets.description]
       );
       newPackage = paquete.insertId
-      
-      console.log(targetsID)
+
       const paquete_concentrador_values = targetsID.map(item => [
         paquete.insertId,
         item.id_concentrador
       ]);
-      console.log('hola',paquete_concentrador_values)
       const [paquete_concentrador] = await connection.query(
         "insert into paquete_concentrador(id_paquete,id_concentrador) VALUES ?",
         [paquete_concentrador_values]
       );
-      console.log('sale')
     }
-    console.log(newPackage)
-
     if (settings.settingsMode == "1") {
       [configuracion_ejecucion] = await connection.query(
         "insert into configuracion_ejecucion(n_ciclos,id_prioridad,n_intentos_comunicacion) values (1,?,?)",
@@ -61,28 +56,26 @@ async function create(form) {
         ]
       );
     }
-    console.log('configuraciones ok')
 
     const [estudio_configuracion_incidencia] = await connection.query(
       "insert into estudio_configuracion_incidencia (nombre) values ('')"
     );
-    configuracion_incidencia_values = tasks.fix.map(item => [
+    configuracion_incidencia_values = issues.fix.map(item => [
       estudio_configuracion_incidencia.insertId,
       item.id_incidencia,
       1,
       1,
       1
     ]);
-    for (det of tasks.detect) {
+    for (det of issues.detect) {
       let marked_as_fix = 0;
       for (task of configuracion_incidencia_values) {
         if (det.id_incidencia == task[1]) {
           marked_as_fix = 1;
-          
+
         }
-        
+
       }
-      console.log(det.id_incidencia ,task,marked_as_fix)
       if (!marked_as_fix) {
         configuracion_incidencia_values.push([
           estudio_configuracion_incidencia.insertId,
@@ -94,23 +87,48 @@ async function create(form) {
       }
 
     }
-    console.log(configuracion_incidencia_values)
 
     const [configuracion_incidencia] = await connection.query(
       "insert into configuracion_incidencia (id_estudio_configuracion_incidencia,id_incidencia,deteccion,correcion,ciclo_insercion) values ?",
       [configuracion_incidencia_values]
     );
-    console.log(configuracion_incidencia)
+
+
+
+
+
+    const [estudio_configuracion_actuacion] = await connection.query(
+      "insert into estudio_configuracion_actuacion (nombre) values ('')"
+    );
+
+    const configuracion_actuacion_values = performances.performances.map(perf => [estudio_configuracion_actuacion.insertId, perf.id_actuacion, 1])
+    console.log(configuracion_actuacion_values)
+    console.log('staki')
+
+    const [configuracion_actuacion] = await connection.query(
+      "insert into configuracion_actuacion (id_estudio_configuracion_actuacion,id_actuacion,ciclo_insercion) values ?",
+      [configuracion_actuacion_values]
+    );
+
+    console.log('configuracion act')
+    console.log(configuracion_actuacion)
+
+
+
+
     const [estudio] = await connection.query(
-      "insert into estudio (id_paquete,id_configuracion_ejecucion,id_configuracion_incidencia,nombre,descripcion) values (?,?,?,?,?)",
+      "insert into estudio (id_paquete,id_configuracion_ejecucion,id_configuracion_incidencia,id_configuracion_actuacion,nombre,descripcion) values (?,?,?,?,?,?)",
       [
         newPackage,
         configuracion_ejecucion.insertId,
         estudio_configuracion_incidencia.insertId,
+        estudio_configuracion_actuacion.insertId,
         study.name,
-        study.description 
+        study.description
       ]
+
     );
+    console.log(estudio)
     console.log('FInaliza correctamente');
 
     await connection.commit();
@@ -179,33 +197,8 @@ async function getAll() {
 // posible refactorizacion.
 async function getCommunicationResult(id) {
   const [result, metadata] = await pool.query(
-    "SELECT \
-    'total' as 'name',ciclo, COUNT(distinct(id_concentrador)) AS 'amount'\
-      FROM\
-      resultado_comunicacion_cerco WHERE\
-          id_estudio = ?\
-          group by ciclo\
-    UNION\
-    SELECT \
-      COM.nombre,\
-      RESCOM.ciclo,\
-      COUNT(distinct(RESCOM.id_concentrador)) AS 'amount'\
-    FROM\
-    resultado_comunicacion_cerco RESCOM\
-          LEFT JOIN\
-      resultado_comunicacion COM ON COM.id_resultado_comunicacion = RESCOM.id_resultado_comunicacion\
-    WHERE\
-      RESCOM.id_estudio = ?\
-    GROUP BY RESCOM.ciclo , RESCOM.id_resultado_comunicacion \
-    UNION SELECT \
-      'Inaccesibles', ciclo, COUNT(distinct(id_concentrador)) AS amount\
-    FROM\
-    resultado_comunicacion_cerco\
-    WHERE\
-      id_estudio = ?\
-          AND id_resultado_comunicacion != 1\
-    GROUP BY ciclo;",
-    [id, id, id]
+    "SELECT name, ciclo, amount FROM 0_MASTER_GAP_Pruebas.view_analisis_de_comunicacion where id_estudio = ?;",
+    [id]
   );
 
   return groupByCiclo(result);
@@ -213,25 +206,7 @@ async function getCommunicationResult(id) {
 
 async function getIssuesResult(id) {
   const [result, metadata] = await pool.query(
-    "SELECT       \
-    RESINC.ciclo,      \
-    D.nombre,      \
-    COUNT (CASE WHEN RESINC.id_resultado_incidencia IN (4, 5, 6) \
-    AND C.id_incidencia = RESINC.id_incidencia THEN 1 END) AS detectado,      \
-    COUNT (CASE WHEN RESINC.id_resultado_incidencia IN (5) \
-    AND C.id_incidencia = RESINC.id_incidencia THEN 1 END) AS corregido,          \
-    C.correcion as fixflag     \
-    FROM estudio A \
-    INNER JOIN estudio_configuracion_incidencia B \
-    ON A.id_configuracion_incidencia = B.id_estudio_configuracion_incidencia          \
-    INNER JOIN configuracion_incidencia C \
-    ON C.id_estudio_configuracion_incidencia = B.id_estudio_configuracion_incidencia        \
-    INNER JOIN incidencia D \
-    ON D.id_incidencia = C.id_incidencia         \
-    INNER JOIN resultado_incidencia_cerco RESINC \
-    ON A.id_estudio = RESINC.id_estudio \
-    WHERE A.id_estudio = ?  \
-    GROUP BY RESINC.ciclo , D.nombre",
+    "SELECT ciclo, nombre, detectado, corregido, fixflag FROM 0_MASTER_GAP_Pruebas.view_analisis_de_problemas where id_estudio = ?;",
     [id]
   );
   return groupByCiclo(result);
@@ -242,9 +217,14 @@ async function getIssuesList() {
   return result;
 }
 
+async function getPerformancesList() {
+  const [result, metadata] = await pool.query("SELECT * from actuacion;");
+  return result;
+}
+
 async function getCiclosInfo(id) {
   const [result, metadata] = await pool.query(
-    "SELECT ciclo,min(fecha_comunicacion) as first ,max(fecha_comunicacion) as last  FROM 0_MASTER_GAP_Pruebas.resultado_comunicacion_cerco where id_estudio = ? group by ciclo;",
+    "SELECT ciclo, first, last FROM 0_MASTER_GAP_Pruebas.view_barra_ciclos where id_estudio = ?;",
     [id]
   );
   return result;
@@ -257,6 +237,7 @@ module.exports = {
   getCommunicationResult,
   getIssuesResult,
   getIssuesList,
+  getPerformancesList,
   getCiclosInfo
 };
 

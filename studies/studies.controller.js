@@ -3,6 +3,7 @@ const router = express.Router();
 const studyService = require("./study.service");
 
 router.get("/issues", getIssuesList);
+router.get("/performances", getPerformancesList);
 router.get("/:id", get);
 /**
  * @swagger
@@ -68,6 +69,13 @@ function getIssueResult(req, res, next) {
 function getIssuesList(req, res, next) {
   studyService
     .getIssuesList(req.params.id)
+    .then(result => res.json(result))
+    .catch(err => next(err));
+}
+
+function getPerformancesList(req, res, next) {
+  studyService
+    .getPerformancesList(req.params.id)
     .then(result => res.json(result))
     .catch(err => next(err));
 }
