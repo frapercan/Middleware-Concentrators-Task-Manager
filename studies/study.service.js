@@ -222,6 +222,11 @@ async function getPerformancesList() {
   return result;
 }
 
+async function getAttributesList() {
+  const [result, metadata] = await pool.query("SELECT * from atributo;");
+  return result;
+}
+
 async function getCiclosInfo(id) {
   const [result, metadata] = await pool.query(
     "SELECT ciclo, first, last FROM 0_MASTER_GAP_Pruebas.view_barra_ciclos where id_estudio = ?;",
@@ -238,6 +243,7 @@ module.exports = {
   getIssuesResult,
   getIssuesList,
   getPerformancesList,
+  getAttributesList,
   getCiclosInfo
 };
 

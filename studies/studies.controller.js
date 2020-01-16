@@ -2,9 +2,7 @@
 const router = express.Router();
 const studyService = require("./study.service");
 
-router.get("/issues", getIssuesList);
-router.get("/performances", getPerformancesList);
-router.get("/:id", get);
+
 /**
  * @swagger
  * /studies:
@@ -22,11 +20,19 @@ router.get("/:id", get);
  *         schema:
  *           $ref: '#/definitions/Study'
  */
+
+
+router.get("/issues", getIssuesList);
+router.get("/performances", getPerformancesList);
+router.get("/attributes", getAttributesList);
+router.get("/:id", get);
 router.get("/", getAll);
 router.post("/", createStudy);
 router.get("/:id/result", getCommunicationResult);
 router.get("/:id/result/issues", getIssueResult);
 router.get("/:id/result/ciclos", getCiclosInfo);
+
+
 
 
 module.exports = router;
@@ -76,6 +82,13 @@ function getIssuesList(req, res, next) {
 function getPerformancesList(req, res, next) {
   studyService
     .getPerformancesList(req.params.id)
+    .then(result => res.json(result))
+    .catch(err => next(err));
+}
+
+function getAttributesList(req, res, next) {
+  studyService
+    .getAttributesList(req.params.id)
     .then(result => res.json(result))
     .catch(err => next(err));
 }
