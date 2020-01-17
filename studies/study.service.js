@@ -24,6 +24,8 @@ async function create(form) {
       "select id_concentrador from concentrador where lvcid in (?)",
       [LVCIDs]
     );
+
+    /* Package insertion */
     let newPackage = targets.package;
     if (targets.selectionMode == 2) { //Creamos un paquete nuevo con sus correspondicentes concentradores y tabla relacional
       const [paquete] = await connection.query(
@@ -40,6 +42,8 @@ async function create(form) {
         [paquete_concentrador_values]
       );
     }
+
+    /* Execution Settings insertion */
     if (settings.settingsMode == "1") {
       [configuracion_ejecucion] = await connection.query(
         "insert into configuracion_ejecucion(n_ciclos,id_prioridad,n_intentos_comunicacion) values (1,?,?)",
@@ -56,6 +60,8 @@ async function create(form) {
         ]
       );
     }
+
+    /* Issues Settings insertion */
 
     const [estudio_configuracion_incidencia] = await connection.query(
       "insert into estudio_configuracion_incidencia (nombre) values ('')"
@@ -87,35 +93,26 @@ async function create(form) {
       }
 
     }
+    if (configuracion_incidencia_values.length > 0) {
+      const [configuracion_incidencia] = await connection.query(
+        "insert into configuracion_incidencia (id_estudio_configuracion_incidencia,id_incidencia,deteccion,correcion,ciclo_insercion) values ?",
+        [configuracion_incidencia_values]
+      );
+    }
 
-    const [configuracion_incidencia] = await connection.query(
-      "insert into configuracion_incidencia (id_estudio_configuracion_incidencia,id_incidencia,deteccion,correcion,ciclo_insercion) values ?",
-      [configuracion_incidencia_values]
-    );
-
-
-
-
-
+    /* Performances Settings insertion */
     const [estudio_configuracion_actuacion] = await connection.query(
       "insert into estudio_configuracion_actuacion (nombre) values ('')"
     );
-
     const configuracion_actuacion_values = performances.performances.map(perf => [estudio_configuracion_actuacion.insertId, perf.id_actuacion, 1])
-    console.log(configuracion_actuacion_values)
-    console.log('staki')
+    if (configuracion_actuacion_values.length > 0) {
+      const [configuracion_actuacion] = await connection.query(
+        "insert into configuracion_actuacion (id_estudio_configuracion_actuacion,id_actuacion,ciclo_insercion) values ?",
+        [configuracion_actuacion_values]
+      );
+    }
 
-    const [configuracion_actuacion] = await connection.query(
-      "insert into configuracion_actuacion (id_estudio_configuracion_actuacion,id_actuacion,ciclo_insercion) values ?",
-      [configuracion_actuacion_values]
-    );
-
-    console.log('configuracion act')
-    console.log(configuracion_actuacion)
-
-
-
-
+    /* Study insertion */
     const [estudio] = await connection.query(
       "insert into estudio (id_paquete,id_configuracion_ejecucion,id_configuracion_incidencia,id_configuracion_actuacion,nombre,descripcion) values (?,?,?,?,?,?)",
       [
@@ -128,8 +125,7 @@ async function create(form) {
       ]
 
     );
-    console.log(estudio)
-    console.log('FInaliza correctamente');
+    console.log(`estudio ${estudio.insertId} insertado correctamente`);
 
     await connection.commit();
   } catch (err) {
@@ -217,6 +213,11 @@ async function getIssuesList() {
   return result;
 }
 
+async function getIssuesGroupsList() {
+  const [result, metadata] = await pool.query("SELECT * from grupo_incidencia where id_grupo_incidencia in (6,1,2,3) order by id_grupo_incidencia desc;");
+  return result;
+}
+
 async function getPerformancesList() {
   const [result, metadata] = await pool.query("SELECT * from actuacion;");
   return result;
@@ -242,6 +243,7 @@ module.exports = {
   getCommunicationResult,
   getIssuesResult,
   getIssuesList,
+  getIssuesGroupsList,
   getPerformancesList,
   getAttributesList,
   getCiclosInfo

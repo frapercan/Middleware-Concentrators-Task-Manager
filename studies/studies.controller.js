@@ -21,8 +21,9 @@ const studyService = require("./study.service");
  *           $ref: '#/definitions/Study'
  */
 
-
+getIssuesGroupsList
 router.get("/issues", getIssuesList);
+router.get("/issues/groups", getIssuesGroupsList);
 router.get("/performances", getPerformancesList);
 router.get("/attributes", getAttributesList);
 router.get("/:id", get);
@@ -74,21 +75,28 @@ function getIssueResult(req, res, next) {
 
 function getIssuesList(req, res, next) {
   studyService
-    .getIssuesList(req.params.id)
+    .getIssuesList()
+    .then(result => res.json(result))
+    .catch(err => next(err));
+}
+
+function getIssuesGroupsList(req, res, next) {
+  studyService
+    .getIssuesGroupsList()
     .then(result => res.json(result))
     .catch(err => next(err));
 }
 
 function getPerformancesList(req, res, next) {
   studyService
-    .getPerformancesList(req.params.id)
+    .getPerformancesList()
     .then(result => res.json(result))
     .catch(err => next(err));
 }
 
 function getAttributesList(req, res, next) {
   studyService
-    .getAttributesList(req.params.id)
+    .getAttributesList()
     .then(result => res.json(result))
     .catch(err => next(err));
 }
