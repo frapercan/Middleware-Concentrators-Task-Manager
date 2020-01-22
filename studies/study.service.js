@@ -193,7 +193,11 @@ async function getAll() {
 // posible refactorizacion.
 async function getCommunicationResult(id) {
   const [result, metadata] = await pool.query(
-    "SELECT name, ciclo, amount FROM 0_MASTER_GAP_Pruebas.view_analisis_de_comunicacion where id_estudio = ?;",
+    "SELECT * FROM 0_MASTER_GAP_Pruebas.view_analisis_de_comunicacion \
+    where id_estudio = ? \
+    order by ciclo asc, FIELD(name, 'total', 'Finalizado correctamente', 'pendiente', 'no accedido', \
+    'Ping KO', 'Error apertura socket', 'CERCO ocupado', 'Error de autenticacion', \
+    'Puerto Comandos Bloqueado', 'CERCO no encontrado en MongoDB', 'Claves CERCO no encontrada en BDE', 'GPRS Inestable');",
     [id]
   );
 
