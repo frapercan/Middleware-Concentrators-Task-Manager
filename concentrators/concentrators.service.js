@@ -27,12 +27,11 @@ async function getAll() {
 async function getConcentrators(concentrators) {
   console.log(concentrators);
   lvcidS = concentrators.map(lvcid => lvcid.lvcid);
-  console.log(lvcidS);
   const [
     result,
     metadata
   ] = await pool.query(
-    "SELECT * FROM 0_MASTER_GAP_Pruebas.informacion_concentrador_front where lvcid in (?);",
+    "SELECT * FROM 0_MASTER_GAP_Pruebas.informacion_concentrador where lvcid in (?);",
     [lvcidS]
   );
 

@@ -230,7 +230,8 @@ async function getAttributesList() {
 
 async function getCiclosInfo(id) {
   const [result, metadata] = await pool.query(
-    "SELECT ciclo, first, last FROM 0_MASTER_GAP_Pruebas.view_barra_ciclos where id_estudio = ?;",
+    "SELECT ciclo, fecha_inicio as first, fecha_finalizacion as last FROM 0_MASTER_GAP_Pruebas.estado_estudio_ciclo \
+    where id_estudio = ?;",
     [id]
   );
   return result;

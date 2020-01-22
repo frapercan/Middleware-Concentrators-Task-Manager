@@ -2,7 +2,7 @@
     "connectionString": "mongodb://192.168.0.101/CERCO-TASK",
     "secret": "THIS IS USED TO SIGN AND VERIFY JWT TOKENS, REPLACE IT WITH YOUR OWN SECRET, IT CAN BE ANY STRING",
     "mysql":{
-        "host": "192.168.0.101",
+        "host": "localhost",
         "user": "gap",
         "password":"gap_2017",
         "database":"0_MASTER_GAP_Pruebas"
