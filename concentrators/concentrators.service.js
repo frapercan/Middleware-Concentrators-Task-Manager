@@ -31,7 +31,7 @@ async function getConcentrators(concentrators) {
     result,
     metadata
   ] = await pool.query(
-    "SELECT * FROM 0_MASTER_GAP_Pruebas.informacion_concentrador where lvcid in (?);",
+    "SELECT * FROM 0_MASTER_GAP_Pruebas.informacion_concentrador_front where lvcid in (?);",
     [lvcidS]
   );
 

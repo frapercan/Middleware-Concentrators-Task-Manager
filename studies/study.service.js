@@ -13,7 +13,7 @@ async function get(id) {
 async function create(form) {
   const { study, targets, settings, issues, performances } = form;
   const LVCIDs = targets.targets.map(cerco => cerco.lvcid);
-
+  
 
 
   const connection = await pool.getConnection();
@@ -206,7 +206,7 @@ async function getCommunicationResult(id) {
 
 async function getIssuesResult(id) {
   const [result, metadata] = await pool.query(
-    "SELECT ciclo, nombre, detectado, corregido, fixflag FROM 0_MASTER_GAP_Pruebas.view_analisis_de_problemas where id_estudio = ?;",
+    "SELECT ciclo, nombre, detectado, corregido, fixflag, id_incidencia FROM 0_MASTER_GAP_Pruebas.view_analisis_de_problemas where id_estudio = ?;",
     [id]
   );
   return groupByCiclo(result);
