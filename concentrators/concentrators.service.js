@@ -25,7 +25,6 @@ async function getAll() {
 }
 
 async function getConcentrators(concentrators) {
-  console.log(concentrators);
   lvcidS = concentrators.map(lvcid => lvcid.lvcid);
   const [
     result,
@@ -54,7 +53,6 @@ async function getConcentrators(concentrators) {
 }
 
 async function getConcentratorsByPackage(package) {
-  console.log(package)
   const [result, metadata] = await pool.query(
     "SELECT c.lvcid as lvcid FROM paquete_concentrador pc \
      right join concentrador c on c.id_concentrador = pc.id_concentrador  \

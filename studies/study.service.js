@@ -7,6 +7,7 @@ async function get(id) {
     "SELECT a.nombre,count(b.id_paquete_concentrador) as 'total' from  estudio a RIGHT JOIN  paquete_concentrador b ON a.id_paquete = b.id_paquete where a.id_estudio = ?",
     [id]
   );
+  
   return result[0];
 }
 
@@ -123,7 +124,6 @@ async function create(form) {
         study.name,
         study.description
       ]
-
     );
     console.log(`estudio ${estudio.insertId} insertado correctamente`);
 
@@ -238,7 +238,11 @@ async function getCiclosInfo(id) {
     where id_estudio = ?;",
     [id]
   );
-  return result;
+  let cycles = {}
+  result.forEach(cycle => {
+    cycles[cycle.ciclo] = {'first':cycle.first,'last':cycle.last}
+  })
+  return cycles
 }
 
 module.exports = {
