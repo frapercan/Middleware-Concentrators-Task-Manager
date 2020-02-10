@@ -1,5 +1,10 @@
 const expressJwt = require('express-jwt');
-const { secret } = require('config.json');
+require('dotenv-safe').config();
+const secret  = process.env.SECRET
+
+
+
+
 
 module.exports = authorize;
 
