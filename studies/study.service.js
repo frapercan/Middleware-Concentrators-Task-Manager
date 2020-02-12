@@ -16,11 +16,25 @@ async function create(form) {
   const LVCIDs = targets.targets.map(cerco => cerco.lvcid);
   
 
+  // Comprobaciones
+  if( (issues.detect.length == 0 && issues.fix.length) && performances.performances.length == 0) {
+    
+    throw new Error('No tasks to perform');
+  } 
+
+  if (LVCIDs.length == 0) {
+    throw new Error('No Cerco found');
+  }
+
+  
 
   const connection = await pool.getConnection();
   await connection.beginTransaction();
 
   try {
+    
+    
+
     const [targetsID, metadata] = await connection.query(
       "select id_concentrador from concentrador where lvcid in (?)",
       [LVCIDs]
@@ -28,7 +42,7 @@ async function create(form) {
 
     /* Package insertion */
     let newPackage = targets.package;
-    if (targets.selectionMode == 2) { //Creamos un paquete nuevo con sus correspondicentes concentradores y tabla relacional
+    if (targets.selectionMode == 2) { 
       const [paquete] = await connection.query(
         "insert into paquete (nombre,descripcion) VALUES (?,?)", [targets.name, targets.description]
       );
@@ -63,8 +77,10 @@ async function create(form) {
     }
 
     /* Issues Settings insertion */
-
-    const [estudio_configuracion_incidencia] = await connection.query(
+    console.log(issues.fix.length, issues.detect.length)
+    let estudio_configuracion_incidencia = null;
+    if (issues.fix.length > 0 || issues.detect.length > 0){
+    [estudio_configuracion_incidencia] = await connection.query(
       "insert into estudio_configuracion_incidencia (nombre) values ('')"
     );
     configuracion_incidencia_values = issues.fix.map(item => [
@@ -74,6 +90,9 @@ async function create(form) {
       1,
       1
     ]);
+
+    console.log(estudio_configuracion_incidencia)
+    console.log(estudio_configuracion_incidencia.insertId)
     for (det of issues.detect) {
       let marked_as_fix = 0;
       for (task of configuracion_incidencia_values) {
@@ -94,7 +113,7 @@ async function create(form) {
       }
 
     }
-    if (configuracion_incidencia_values.length > 0) {
+    console.log(configuracion_incidencia_values)
       const [configuracion_incidencia] = await connection.query(
         "insert into configuracion_incidencia (id_estudio_configuracion_incidencia,id_incidencia,deteccion,correcion,ciclo_insercion) values ?",
         [configuracion_incidencia_values]
@@ -102,16 +121,20 @@ async function create(form) {
     }
 
     /* Performances Settings insertion */
-    const [estudio_configuracion_actuacion] = await connection.query(
+    let estudio_configuracion_actuacion = null;
+    if( performances.performances.length > 0 ) {
+    estudio_configuracion_actuacion = await connection.query(
       "insert into estudio_configuracion_actuacion (nombre) values ('')"
     );
     const configuracion_actuacion_values = performances.performances.map(perf => [estudio_configuracion_actuacion.insertId, perf.id_actuacion, 1])
-    if (configuracion_actuacion_values.length > 0) {
+    
       const [configuracion_actuacion] = await connection.query(
         "insert into configuracion_actuacion (id_estudio_configuracion_actuacion,id_actuacion,ciclo_insercion) values ?",
         [configuracion_actuacion_values]
       );
+
     }
+    
 
     /* Study insertion */
     const [estudio] = await connection.query(
@@ -119,8 +142,8 @@ async function create(form) {
       [
         newPackage,
         configuracion_ejecucion.insertId,
-        estudio_configuracion_incidencia.insertId,
-        estudio_configuracion_actuacion.insertId,
+        estudio_configuracion_incidencia ? estudio_configuracion_incidencia.insertId : estudio_configuracion_incidencia,
+        estudio_configuracion_actuacion ? estudio_configuracion_actuacion.insertId : estudio_configuracion_actuacion,
         study.name,
         study.description
       ]
