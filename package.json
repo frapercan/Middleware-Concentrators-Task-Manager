@@ -9,7 +9,7 @@
     },
     "scripts": {
         "swagger": "swagger-jsdoc -d swaggerDef.js -o swagger.json",
-        "start": "NODE_ENV=production node ./server.js",
+        "start": "node ./server.js",
         "dev": "npm run swagger && nodemon server.js "
     },
     "dependencies": {
