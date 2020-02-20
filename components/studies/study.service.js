@@ -165,7 +165,9 @@ async function create({
     );
     console.log(`estudio ${estudio.insertId} insertado correctamente`);
 
-    await connection.commit();
+    //await connection.commit();
+    await connection.rollback();
+
   } catch (err) {
     await connection.rollback();
     // Throw the error again so others can catch it.
