@@ -22,7 +22,7 @@ const concentratorService = require("./concentrators.service");
  *           $ref: '#/definitions/Concentrator'
  */
 router.get("/", getAll);
-router.post("/concentrators", getConcentrators);
+router.post("/", getConcentrators);
 router.post("/package", getConcentratorsByPackage);
 
 module.exports = router;

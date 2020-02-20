@@ -15,6 +15,308 @@
     }
   },
   "paths": {
+    "/attributes": {
+      "get": {
+        "description": "Retrieve the full list of attributes",
+        "tags": [
+          "Attributes"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": [
+              "Attribute"
+            ],
+            "schema": {
+              "$ref": "#/definitions/Attribute"
+            }
+          }
+        }
+      }
+    },
+    "/concentrators": {
+      "get": {
+        "description": "Retrieve the full list of concentrators",
+        "tags": [
+          "concentrators"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array",
+            "schema": {
+              "$ref": "#/definitions/Concentrator"
+            }
+          }
+        }
+      }
+    },
+    "/issues": {
+      "get": {
+        "description": "Retrieve the full list issues",
+        "tags": [
+          "Issues"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": [
+              "Issue"
+            ],
+            "schema": {
+              "$ref": "#/definitions/Issue"
+            }
+          }
+        }
+      }
+    },
+    "/issues/groups": {
+      "get": {
+        "description": "Retrieve the groups of issues",
+        "tags": [
+          "Issues"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": [
+              "Issue"
+            ],
+            "schema": {
+              "$ref": "#/definitions/Issue"
+            }
+          }
+        }
+      }
+    },
+    "/issues/{id}": {
+      "get": {
+        "description": "Get the results of the study with the ID provided",
+        "tags": [
+          "Issues"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the study",
+            "required": true,
+            "type": "Integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "loop:name:result"
+          }
+        }
+      }
+    },
+    "/packages": {
+      "get": {
+        "description": "Retrieve the full list of packages",
+        "tags": [
+          "packages"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array",
+            "schema": {
+              "$ref": "#/definitions/Package"
+            }
+          }
+        }
+      }
+    },
+    "/performances": {
+      "get": {
+        "description": "Retrieve the full list performances",
+        "tags": [
+          "Performances"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": [
+              "Performance"
+            ],
+            "schema": {
+              "$ref": "#/definitions/Performance"
+            }
+          }
+        }
+      }
+    },
+    "/performances/{id}": {
+      "get": {
+        "description": "Get the performances results of the study with the ID provided",
+        "tags": [
+          "Performances"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the study",
+            "required": true,
+            "type": "Integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "loop:name:result"
+          }
+        }
+      }
+    },
+    "/studies": {
+      "get": {
+        "description": "Retrieve the full list of studies",
+        "tags": [
+          "Studies"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": [
+              "Study"
+            ],
+            "schema": {
+              "$ref": "#/definitions/Study"
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Create study. (too complex too test it through API)",
+        "tags": [
+          "Studies"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "body",
+            "description": "ID of the study to return",
+            "required": true,
+            "type": "Integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Study",
+            "schema": {
+              "$ref": "#/definitions/Study"
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}": {
+      "get": {
+        "description": "Find a study by ID",
+        "tags": [
+          "Studies"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the study to return",
+            "required": true,
+            "type": "Integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Study",
+            "schema": {
+              "$ref": "#/definitions/Study"
+            }
+          }
+        }
+      }
+    },
     "/users/authenticate": {
       "post": {
         "description": "Retreive user info  bearer token",
@@ -70,121 +372,21 @@
           }
         }
       }
-    },
-    "/studies": {
-      "get": {
-        "description": "Retrieve the full list of studies",
-        "tags": [
-          "studies"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Array",
-            "schema": {
-              "$ref": "#/definitions/Study"
-            }
-          }
-        }
-      }
-    },
-    "/concentrators": {
-      "get": {
-        "description": "Retrieve the full list of concentrators",
-        "tags": [
-          "concentrators"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Array",
-            "schema": {
-              "$ref": "#/definitions/Concentrator"
-            }
-          }
-        }
-      }
-    },
-    "/packages": {
-      "get": {
-        "description": "Retrieve the full list of packages",
-        "tags": [
-          "packages"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Array",
-            "schema": {
-              "$ref": "#/definitions/Package"
-            }
-          }
-        }
-      }
     }
   },
   "definitions": {
-    "User": {
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "firstName": {
-          "type": "string"
-        },
-        "lastName": {
-          "type": "integer"
-        },
-        "createdDate": {
-          "type": "string",
-          "format": "date-time"
-        }
-      }
-    },
-    "Study": {
-      "type": "object",
+    "Attribute": {
+      "type": null,
       "required": [
-        "id_estudio",
-        "nombre",
-        "fecha_insercion",
-        "total",
-        "finalizado_cerco",
-        "progreso_cerco",
-        "pendiente_cerco"
+        "id",
+        "name"
       ],
       "properties": {
-        "id_paquete": {
+        "id": {
           "type": "number"
         },
         "name": {
           "type": "string"
-        },
-        "currentPrice": {
-          "type": "number"
-        },
-        "lastUpdate": {
-          "type": "number"
         }
       }
     },
@@ -200,6 +402,41 @@
         },
         "lvcid": {
           "type": "string"
+        }
+      }
+    },
+    "Issue": {
+      "type": null,
+      "required": [
+        "id",
+        "name",
+        "description",
+        "group",
+        "priority",
+        "detect",
+        "fix"
+      ],
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "number"
+        },
+        "priority": {
+          "type": "number"
+        },
+        "detect": {
+          "type": "array"
+        },
+        "fix": {
+          "type": "array"
         }
       }
     },
@@ -223,6 +460,97 @@
         },
         "fecha_insercion": {
           "type": "date"
+        }
+      }
+    },
+    "Performance": {
+      "type": null,
+      "required": [
+        "id",
+        "name",
+        "description",
+        "group",
+        "priority"
+      ],
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "group": {
+          "type": "number"
+        },
+        "priority": {
+          "type": "number"
+        }
+      }
+    },
+    "Study": {
+      "type": null,
+      "required": [
+        "id",
+        "name",
+        "initialDate",
+        "loops"
+      ],
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        },
+        "initialDate": {
+          "type": "date"
+        },
+        "loops": {
+          "type": "number"
+        },
+        "currentLoop": {
+          "type": "number"
+        },
+        "start": {
+          "type": "number"
+        },
+        "concentratorsAmount": {
+          "type": "number"
+        },
+        "tasksAmount": {
+          "type": "number"
+        },
+        "taskFinishedAmount": {
+          "type": "number"
+        },
+        "taskProgressAmount": {
+          "type": "number"
+        },
+        "taskPedingAmount": {
+          "type": "number"
+        },
+        "taskQueuedAmount": {
+          "type": "number"
+        }
+      }
+    },
+    "User": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "integer"
+        },
+        "createdDate": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     }

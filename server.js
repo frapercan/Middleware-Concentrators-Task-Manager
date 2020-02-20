@@ -8,10 +8,6 @@ const errorHandler = require('_helpers/error-handler');
 require('dotenv-safe').config();
 
 
-
-
-
-
 app.use(bodyParser.json({ limit: '50MB' }));
 app.use(bodyParser.urlencoded({
   extended: true
@@ -36,29 +32,21 @@ app.use(cors());
 // use JWT auth to secure the api
 app.use(jwt());
 
-// api routes
-app.use('/users', require('./users/users.controller'));
-app.use('/studies', require('./studies/studies.controller'));
-app.use('/concentrators', require('./concentrators/concentrators.controller'));
-app.use('/packages', require('./packages/packages.controller'));
 
 // global error handler
 app.use(errorHandler);
-
-
-
 
 // use JWT auth to secure the api
 app.use(jwt());
 
 // api routes
-app.use('/users', require('./users/users.controller'));
-app.use('/studies', require('./studies/studies.controller'));
-app.use('/concentrators', require('./concentrators/concentrators.controller'));
-app.use('/packages', require('./packages/packages.controller'));
-
-// global error handler
-app.use(errorHandler);
+app.use('/users', require('components/users/users.controller'));
+app.use('/attributes', require('components/attributes/attributes.controller'));
+app.use('/issues', require('components/issues/issues.controller'));
+app.use('/performances', require('components/performances/performances.controller'));
+app.use('/studies', require('components/studies/studies.controller'));
+app.use('/concentrators', require('components/concentrators/concentrators.controller'));
+app.use('/packages', require('components/packages/packages.controller'));
 
 
 

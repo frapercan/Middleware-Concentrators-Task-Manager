@@ -8,7 +8,7 @@ const User = db.User;
 module.exports = {
     authenticate,
     getAll,
-    getById,
+    get,
     create,
     update,
     delete: _delete
@@ -30,7 +30,7 @@ async function getAll() {
     return await User.find().select('-hash');
 }
 
-async function getById(id) {
+async function get(id) {
     return await User.findById(id).select('-hash');
 }
 

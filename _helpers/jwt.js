@@ -1,6 +1,6 @@
 const expressJwt = require('express-jwt');
 require('dotenv-safe').config();
-const userService = require('../users/user.service');
+const userService = require('components/users/user.service');
 
 module.exports = jwt;
 
@@ -19,7 +19,7 @@ function jwt() {
 }
 
 async function isRevoked(req, payload, done) {
-    const user = await userService.getById(payload.sub);
+    const user = await userService.get(payload.sub);
 
     // revoke token if user no longer exists
     if (!user) {

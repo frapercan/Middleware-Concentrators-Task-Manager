@@ -5,7 +5,7 @@ module.exports = {
         version: '1.0.0', // Version (required)
         description: 'API documentation description', // Description (optional)
     },
-        apis: ['users/*.js','studies/*.js','concentrators/*.js','packages/*.js'], //change this according to path where your code lies
+        apis: ['components/*/*.js'], //change this according to path where your code lies
         components: {
             securitySchemes: {
               bearerAuth: {
@@ -15,7 +15,4 @@ module.exports = {
               }
             }
           },
-
-        
-         
      };

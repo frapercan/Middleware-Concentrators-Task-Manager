@@ -1,6 +1,6 @@
 ﻿const express = require("express");
 const router = express.Router();
-const packageService = require("./packages.service");
+const packageService = require("./package.service");
 
 // routes
 

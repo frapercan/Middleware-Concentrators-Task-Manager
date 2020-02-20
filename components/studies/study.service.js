@@ -1,39 +1,57 @@
 ﻿const pool = require("_helpers/mysql");
-const poolTransaction = require("_helpers/mysql");
-const Study = require("./studies.model");
+const Study = require("./study.model");
+let {groupCommunicationResultByLoop} = require("_helpers/grouping")
 
 async function get(id) {
+
   const [result, metadata] = await pool.query(
     "SELECT a.nombre,count(b.id_paquete_concentrador) as 'total' from  estudio a RIGHT JOIN  paquete_concentrador b ON a.id_paquete = b.id_paquete where a.id_estudio = ?",
     [id]
   );
-  
+
   return result[0];
 }
 
-async function create(form) {
-  const { study, targets, settings, issues, performances } = form;
-  const LVCIDs = targets.targets.map(cerco => cerco.lvcid);
-  
+async function create({
+  studyName,
+  studyDescription,
+  targetsMode,
+  packageId,
+  targets,
+  packageName,
+  packageDescription,
+  settingsMode,
+  loopLength,
+  executionNumber,
+  attempts,
+  priority,
+  detect,
+  fix,
+  performances,
+  reading }) {
+
+
+  const LVCIDs = targets.map(cerco => cerco.lvcid);
+
 
   // Comprobaciones
-  if( (issues.detect.length == 0 && issues.fix.length) && performances.performances.length == 0) {
-    
+  if ((detect.length == 0 && fix.length) && performances.length == 0) {
+
     throw new Error('No tasks to perform');
-  } 
+  }
 
   if (LVCIDs.length == 0) {
     throw new Error('No Cerco found');
   }
 
-  
+
 
   const connection = await pool.getConnection();
   await connection.beginTransaction();
 
   try {
-    
-    
+
+
 
     const [targetsID, metadata] = await connection.query(
       "select id_concentrador from concentrador where lvcid in (?)",
@@ -41,10 +59,10 @@ async function create(form) {
     );
 
     /* Package insertion */
-    let newPackage = targets.package;
-    if (targets.selectionMode == 2) { 
+    let newPackage = packageId;
+    if (targetsMode == 2) {
       const [paquete] = await connection.query(
-        "insert into paquete (nombre,descripcion) VALUES (?,?)", [targets.name, targets.description]
+        "insert into paquete (nombre,descripcion) VALUES (?,?)", [packageName, packageDescription]
       );
       newPackage = paquete.insertId
 
@@ -59,61 +77,58 @@ async function create(form) {
     }
 
     /* Execution Settings insertion */
-    if (settings.settingsMode == "1") {
+    if (settingsMode == "1") {
       [configuracion_ejecucion] = await connection.query(
         "insert into configuracion_ejecucion(n_ciclos,id_prioridad,n_intentos_comunicacion) values (1,?,?)",
-        [settings.priority, settings.attempts]
+        [priority, attempts]
       );
     } else {
       [configuracion_ejecucion] = await connection.query(
         "insert into configuracion_ejecucion(num_horas_periodicidad,n_ciclos,id_prioridad,n_intentos_comunicacion) values (?,?,?,?)",
         [
-          settings.loopLength,
-          settings.executionNumber,
-          settings.priority,
-          settings.attempts
+          loopLength,
+          executionNumber,
+          priority,
+          attempts
         ]
       );
     }
 
     /* Issues Settings insertion */
-    console.log(issues.fix.length, issues.detect.length)
     let estudio_configuracion_incidencia = null;
-    if (issues.fix.length > 0 || issues.detect.length > 0){
-    [estudio_configuracion_incidencia] = await connection.query(
-      "insert into estudio_configuracion_incidencia (nombre) values ('')"
-    );
-    configuracion_incidencia_values = issues.fix.map(item => [
-      estudio_configuracion_incidencia.insertId,
-      item.id_incidencia,
-      1,
-      1,
-      1
-    ]);
+    if (fix.length > 0 || detect.length > 0) {
+      [estudio_configuracion_incidencia] = await connection.query(
+        "insert into estudio_configuracion_incidencia (nombre) values ('')"
+      );
+      configuracion_incidencia_values = issues.fix.map(item => [
+        estudio_configuracion_incidencia.insertId,
+        item.id_incidencia,
+        1, //Detectar (Requisito core, no me gusta)
+        1, //Modo arreglar
+        1 // Ciclo inicial
+      ]);
 
-    console.log(estudio_configuracion_incidencia)
-    console.log(estudio_configuracion_incidencia.insertId)
-    for (det of issues.detect) {
-      let marked_as_fix = 0;
-      for (task of configuracion_incidencia_values) {
-        if (det.id_incidencia == task[1]) {
-          marked_as_fix = 1;
+      for (det of detect) {
+        let marked_as_fix = 0;
+        for (task of configuracion_incidencia_values) {
+          if (det.id_incidencia == task[1]) {
+            marked_as_fix = 1;
 
+          }
+
+        }
+        if (!marked_as_fix) {
+          configuracion_incidencia_values.push([
+            estudio_configuracion_incidencia.insertId,
+            det.id_incidencia,
+            1,
+            0,
+            1
+          ]);
         }
 
       }
-      if (!marked_as_fix) {
-        configuracion_incidencia_values.push([
-          estudio_configuracion_incidencia.insertId,
-          det.id_incidencia,
-          1,
-          0,
-          1
-        ]);
-      }
-
-    }
-    console.log(configuracion_incidencia_values)
+      console.log(configuracion_incidencia_values)
       const [configuracion_incidencia] = await connection.query(
         "insert into configuracion_incidencia (id_estudio_configuracion_incidencia,id_incidencia,deteccion,correcion,ciclo_insercion) values ?",
         [configuracion_incidencia_values]
@@ -122,19 +137,19 @@ async function create(form) {
 
     /* Performances Settings insertion */
     let estudio_configuracion_actuacion = null;
-    if( performances.performances.length > 0 ) {
-    estudio_configuracion_actuacion = await connection.query(
-      "insert into estudio_configuracion_actuacion (nombre) values ('')"
-    );
-    const configuracion_actuacion_values = performances.performances.map(perf => [estudio_configuracion_actuacion.insertId, perf.id_actuacion, 1])
-    
+    if (performances.length > 0) {
+      estudio_configuracion_actuacion = await connection.query(
+        "insert into estudio_configuracion_actuacion (nombre) values ('')"
+      );
+      const configuracion_actuacion_values = performances.performances.map(perf => [estudio_configuracion_actuacion.insertId, perf.id_actuacion, 1])
+
       const [configuracion_actuacion] = await connection.query(
         "insert into configuracion_actuacion (id_estudio_configuracion_actuacion,id_actuacion,ciclo_insercion) values ?",
         [configuracion_actuacion_values]
       );
 
     }
-    
+
 
     /* Study insertion */
     const [estudio] = await connection.query(
@@ -144,8 +159,8 @@ async function create(form) {
         configuracion_ejecucion.insertId,
         estudio_configuracion_incidencia ? estudio_configuracion_incidencia.insertId : estudio_configuracion_incidencia,
         estudio_configuracion_actuacion ? estudio_configuracion_actuacion.insertId : estudio_configuracion_actuacion,
-        study.name,
-        study.description
+        studyName,
+        studyDescription
       ]
     );
     console.log(`estudio ${estudio.insertId} insertado correctamente`);
@@ -171,10 +186,7 @@ async function getAll() {
     min(cont.fecha_inicio) as fecha_inicio_ciclo, \
     COUNT( \
       distinct(cont.id_concentrador)\
-    ) as total, \
-    COUNT( \
-      cont.id_concentrador \
-    ) as total_tareas, \
+    ) as concentradores_cantidad, \
     COUNT( \
       CASE WHEN cont.id_estado_ejecucion = 3 THEN 1 END \
     ) AS finalizado_tarea, \
@@ -203,8 +215,7 @@ async function getAll() {
       study.n_ciclos,
       study.ciclo_actual,
       study.fecha_inicio_ciclo,
-      study.total,
-      study.total_tareas,
+      study.concentradores_cantidad,
       study.finalizado_tarea,
       study.progreso_tarea,
       study.encolado_tarea,
@@ -213,7 +224,7 @@ async function getAll() {
   });
 }
 
-// posible refactorizacion.
+
 async function getCommunicationResult(id) {
   const [result, metadata] = await pool.query(
     "SELECT * FROM 0_MASTER_GAP_Pruebas.view_analisis_de_comunicacion \
@@ -223,37 +234,35 @@ async function getCommunicationResult(id) {
     'Puerto Comandos Bloqueado', 'CERCO no encontrado en MongoDB', 'Claves CERCO no encontrada en BDE', 'GPRS Inestable');",
     [id]
   );
-
-  return groupByCiclo(result);
+  return groupCommunicationResultByLoop(result)
 }
 
-async function getIssuesResult(id) {
+async function getCommunicationResultOverview(id) {
+  console.log(id)
   const [result, metadata] = await pool.query(
-    "SELECT ciclo, nombre, detectado, corregido, fixflag, id_incidencia FROM 0_MASTER_GAP_Pruebas.view_analisis_de_problemas where id_estudio = ?;",
+    "SELECT ciclo, \
+    SUM(CASE \
+        WHEN id_resultado = 7 OR id_resultado = 4 THEN amount \
+    END) AS comunicacion, \
+        SUM(CASE \
+        WHEN id_resultado = 2 THEN amount \
+    END) AS posible_incidencia, \
+        SUM(CASE \
+        WHEN id_resultado = 3 THEN amount \
+    END) AS gestion_sistemas, \
+            SUM(CASE \
+        WHEN id_resultado = 7 or id_resultado = 4 or id_resultado = 2 or id_resultado = 3 THEN amount \
+    END) AS total \
+FROM \
+    view_analisis_de_comunicacion \
+WHERE \
+    id_estudio = ? \
+GROUP BY ciclo;",
     [id]
   );
-  return groupByCiclo(result);
+  return result
 }
 
-async function getIssuesList() {
-  const [result, metadata] = await pool.query("SELECT * from incidencia;");
-  return result;
-}
-
-async function getIssuesGroupsList() {
-  const [result, metadata] = await pool.query("SELECT * from grupo_incidencia where id_grupo_incidencia in (6,1,2,3) order by id_grupo_incidencia desc;");
-  return result;
-}
-
-async function getPerformancesList() {
-  const [result, metadata] = await pool.query("SELECT * from actuacion;");
-  return result;
-}
-
-async function getAttributesList() {
-  const [result, metadata] = await pool.query("SELECT * from atributo;");
-  return result;
-}
 
 async function getCiclosInfo(id) {
   const [result, metadata] = await pool.query(
@@ -263,7 +272,7 @@ async function getCiclosInfo(id) {
   );
   let cycles = {}
   result.forEach(cycle => {
-    cycles[cycle.ciclo] = {'first':cycle.first,'last':cycle.last}
+    cycles[cycle.ciclo] = { 'first': cycle.first, 'last': cycle.last }
   })
   return cycles
 }
@@ -273,23 +282,9 @@ module.exports = {
   create,
   getAll,
   getCommunicationResult,
-  getIssuesResult,
-  getIssuesList,
-  getIssuesGroupsList,
-  getPerformancesList,
-  getAttributesList,
+  getCommunicationResultOverview,
   getCiclosInfo
 };
 
-function groupByCiclo(obj) {
-  groupedByCiclo = {};
-  obj.map(item => (groupedByCiclo[Number(item.ciclo)] = []));
-  for (let i of Object.keys(groupedByCiclo)) {
-    for (var j = 0; j < obj.length; j++) {
-      if (obj[j].ciclo == i) {
-        groupedByCiclo[i].push(obj[j]);
-      }
-    }
-  }
-  return Object.keys(groupedByCiclo).map(loop => groupedByCiclo[loop]);
-}
+
+
